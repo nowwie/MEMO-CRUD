@@ -15,6 +15,9 @@ async function fetchInterpretasion(id: string) {
             "interpretations",
             id
         );
+        if (!interpretation) {
+            throw new Error(`Interpretation with ID ${id} not found`);
+        }
         return interpretation;
     } catch (error) {
         console.error("Error fetching interpretation:", error);
@@ -113,6 +116,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         }
 
         const interpretation = await req.json();
+        if (!interpretation || !interpretation.Judul || !interpretation.Isi) {
+            return NextResponse.json(
+                { error: "Invalid data provided" },
+                { status: 400 }
+            );
+        }
         await updateInterpretation(id, interpretation);
         return NextResponse.json({ message: "Interpretation updated" });
     } catch (error) {
