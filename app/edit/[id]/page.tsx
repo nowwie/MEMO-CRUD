@@ -24,6 +24,7 @@ export default function EditPage() {
         console.log(data);
         setFormData({ Judul: data.interpretation.Judul, Isi: data.interpretation.Isi });
       } catch (error) {
+        console.error(error);
         setError("Failed to load");
       }
     };

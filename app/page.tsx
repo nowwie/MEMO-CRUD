@@ -53,6 +53,7 @@ const handleDelete = async(id: string) => {
     setInterpretations((prevInterpretations) => prevInterpretations.filter((i)=>i.$id !== id))
 
   } catch (error) {
+    console.error(error);
     setError("Failed to delete. Please try again.");
   }
 };

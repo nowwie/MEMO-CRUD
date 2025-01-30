@@ -1,77 +1,126 @@
 import client from "@/lib/appwrite_client";
-import {Databases} from "appwrite";
-import { NextResponse } from "next/server";
+import { Databases } from "appwrite";
+import { NextResponse, NextRequest } from "next/server";
 
 const database = new Databases(client);
 
-// fetch a spesific
-
-async function fetchInterpretasion(id: string){
+// Fetch a specific interpretation
+async function fetchInterpretasion(id: string) {
     try {
-        const interpretation = await database.getDocument(process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string, "interpretations", id);
+        if (!process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID) {
+            throw new Error("Database ID is missing in environment variables");
+        }
+        const interpretation = await database.getDocument(
+            process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
+            "interpretations",
+            id
+        );
         return interpretation;
     } catch (error) {
-        console.error("Error fetching interpretation", error);
+        console.error("Error fetching interpretation:", error);
         throw new Error("Failed to fetch interpretation");
     }
 }
 
-//Delete spesific
-async function deleteInterpretation(id: string){
+// Delete specific interpretation
+async function deleteInterpretation(id: string) {
     try {
-        const response = await database.deleteDocument(process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string, "interpretations", id);
+        if (!process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID) {
+            throw new Error("Database ID is missing in environment variables");
+        }
+        const response = await database.deleteDocument(
+            process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
+            "interpretations",
+            id
+        );
         return response;
     } catch (error) {
-        console.error("Error deleting interpretation", error);
+        console.error("Error deleting interpretation:", error);
         throw new Error("Failed to delete interpretation");
     }
 }
 
-//update
-async function updateInterpretation(id: string, data:{Judul: string, Isi: string}){
+// Update interpretation
+async function updateInterpretation(id: string, data: { Judul: string; Isi: string }) {
     try {
-        const response = await database.updateDocument(process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string, "interpretations", id, data);
+        if (!process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID) {
+            throw new Error("Database ID is missing in environment variables");
+        }
+        const response = await database.updateDocument(
+            process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
+            "interpretations",
+            id,
+            data
+        );
         return response;
     } catch (error) {
-        console.error("Error updating interpretation", error);
+        console.error("Error updating interpretation:", error);
         throw new Error("Failed to update interpretation");
     }
 }
 
-export async function GET(req: Request, {params}: {params: {id: string}}){
+// GET request handler
+export async function GET(
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> } 
+    
+) {
     try {
-        const id = params.id;
+        const id = (await params).id;
+        console.log("Params received:", params);
+        if (!id) {
+            return NextResponse.json({ error: "Missing ID parameter" }, { status: 400 });
+        }
+
         const interpretation = await fetchInterpretasion(id);
-        return NextResponse.json({interpretation});
+        return NextResponse.json({ interpretation });
     } catch (error) {
-        return NextResponse.json({error: "Failed to fetch interpretation"},
-            {status: 500}
+        console.error("Error in GET request:", error);
+        return NextResponse.json(
+            { error: "Failed to fetch interpretation" },
+            { status: 500 }
         );
     }
 }
 
 
-export async function DELETE(req: Request, {params}: {params: {id: string}}){
+// DELETE request handler
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }>}) {
     try {
-        const id = params.id;
+        const id = (await params).id;
+        if (!id) {
+            return NextResponse.json({ error: "Missing ID parameter" }, { status: 400 });
+        }
+
         await deleteInterpretation(id);
-        return NextResponse.json({message: "Interpetaion deleted"});
+        return NextResponse.json({ message: "Interpretation deleted" });
     } catch (error) {
-        return NextResponse.json({error: "Failed to deleted interpretation"},
-            {status: 500}
+        console.error("Error in DELETE request:", error);
+        return NextResponse.json(
+            { error: "Failed to delete interpretation" },
+            { status: 500 }
         );
     }
 }
 
-export async function PUT(req: Request, {params}: {params: {id: string}}){
+// PUT request handler
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }
+
+) {
     try {
-        const id = params.id;
+        const id = (await params).id;
+        if (!id) {
+            return NextResponse.json({ error: "Missing ID parameter" }, { status: 400 });
+        }
+
         const interpretation = await req.json();
         await updateInterpretation(id, interpretation);
-        return NextResponse.json({message: "Interpretation updated"});
+        return NextResponse.json({ message: "Interpretation updated" });
     } catch (error) {
-        return NextResponse.json({error: "Failed to updated interpretation"},
-            {status: 500}
+        console.error("Error in PUT request:", error);
+        return NextResponse.json(
+            { error: "Failed to update interpretation" },
+            { status: 500 }
         );
     }
 }

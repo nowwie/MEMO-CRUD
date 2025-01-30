@@ -11,7 +11,7 @@ async function createInterpretation(data: {Judul: string, Isi: string}){
         const response = await database.createDocument(process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string, "interpretations", ID.unique(), data);
         return response;
     } catch (error){
-        console.error('Error creating interpretaion', error);
+        console.error("Error creating interpretaion", error);
         throw new Error("Failed to create interpretation");
     }
 }
@@ -24,7 +24,7 @@ async function fetchInterpretations(){
              [Query.orderDesc("$createdAt")]);
         return response;
     } catch (error){
-        console.error('Error creating interpretaion', error);
+        console.error("Error creating interpretaion", error);
         throw new Error("Failed to fetch interpretation");
     }
 }
@@ -33,9 +33,10 @@ export async function POST(req: Request){
    try {
     const {Judul, Isi} = await req.json();
     const data = {Judul, Isi};
-    const response = await createInterpretation(data);
+    await createInterpretation(data);
     return NextResponse.json({message: "Interpretation created"});
    } catch (error) {
+    console.error("Error in POST:", error);
     return NextResponse.json(
         {
             error: "Failed to create interpretations",
@@ -51,6 +52,7 @@ export async function GET(){
         return NextResponse.json(interpretations);
 
     } catch (error) {
+        console.error("Error in GET:", error);
         return NextResponse.json({error : "Failed to fetch Interpretations"},
         {status: 500});
     }
