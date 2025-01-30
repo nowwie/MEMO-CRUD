@@ -67,7 +67,6 @@ export async function GET(
 ) {
     try {
         const id = (await params).id;
-        console.log("Params received:", params);
         if (!id) {
             return NextResponse.json({ error: "Missing ID parameter" }, { status: 400 });
         }
